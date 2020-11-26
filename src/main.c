@@ -59,6 +59,11 @@ int File_truncate(int fd) {
 	#define O_LARGEFILE 0
 #endif
 
+#ifndef O_NOATIME
+	//# just ignore
+	#define O_NOATIME 0
+#endif
+
 int main(int argc, char *argv[]) {
 	const char* const selfName = argv[0];
 	const char* const srcFilePath = argv[1];
@@ -73,8 +78,8 @@ int main(int argc, char *argv[]) {
 	srcBuffer = malloc(bufferSize + bufferSize); if(srcBuffer == NULL) { ret = Error_noMemory; goto noMemory; }
 	destBuffer = &srcBuffer[bufferSize];
 	
-	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : open(srcFilePath, O_RDONLY | O_LARGEFILE)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
-	int destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE /* | O_NOATIME */); if(destFile < 0) { ret = Error_destOpenFailded; goto openDestFailed; }
+	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : open(srcFilePath, O_RDONLY | O_LARGEFILE | O_NOATIME)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
+	int destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE | O_NOATIME); if(destFile < 0) { ret = Error_destOpenFailded; goto openDestFailed; }
 	
 	for(;;) {
 		ssize_t srcReadedBytesCount = read(srcFile, srcBuffer, bufferSize);

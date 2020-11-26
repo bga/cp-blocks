@@ -106,5 +106,26 @@ int main(int argc, char *argv[]) {
 	
 	noMemory:
 	
+	switch(ret) {
+		case(0): {
+			//# ok
+		} break;
+		case(Error_noMemory): {
+			fprintf(stderr, "Could not allocate memory for buffer\n");
+		} break;
+		case(Error_srcOpenFailded): {
+			fprintf(stderr, "Could not open srcFile %s\n", srcFilePath);
+		} break;
+		case(Error_destOpenFailded): {
+			fprintf(stderr, "Could not open destFile %s\n", destFilePath);
+		} break;
+		case(Error_diskFull): {
+			fprintf(stderr, "Could not write to destFile %s. No disk space\n", destFilePath);
+		} break;
+		default: {
+			fprintf(stderr, "Could not allocate memory for buffer\n");
+		}
+	}
+	
 	return ret;
 }

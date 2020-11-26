@@ -69,12 +69,12 @@ int main(int argc, char *argv[]) {
 	int ret = 0;
 	uint8_t* srcBuffer;
 	uint8_t* destBuffer;
-	
+
 	srcBuffer = malloc(bufferSize + bufferSize); if(srcBuffer == NULL) { ret = Error_noMemory; goto noMemory; }
 	destBuffer = &srcBuffer[bufferSize];
 	
-	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : open(srcFilePath, O_RDONLY | O_LARGEFILE)); if(srcFile == -1) { ret = Error_srcOpenFailded; goto openSrcFailed; }
-	int destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE /* | O_NOATIME */); if(destFile == -1) { ret = Error_destOpenFailded; goto openDestFailed; }
+	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : open(srcFilePath, O_RDONLY | O_LARGEFILE)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
+	int destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE /* | O_NOATIME */); if(destFile < 0) { ret = Error_destOpenFailded; goto openDestFailed; }
 	
 	for(;;) {
 		ssize_t srcReadedBytesCount = read(srcFile, srcBuffer, bufferSize);

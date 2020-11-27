@@ -1,1 +1,1 @@
-Smart copy file tool. Overwrite only changed clusters in destFile. 
+Smart CLI copy file tool. POSIX compliant. Overwrites only changed clusters in destFile. Supports stdin

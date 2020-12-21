@@ -58,7 +58,7 @@ CPPFLAGS += -MMD -MP
 
 # LDFLAGS += -L../../lib/$(PLATFORM)/$(ARCH) -L../../../../!cpp/lib/$(PLATFORM)/$(ARCH) 
 
-# all: app
+all: $(TARGET_EXEC)
 
 $(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o "$@" $(LDFLAGS)

@@ -22,12 +22,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-const char* const help = ("%s [--stat] (srcFile | -) destFile"
+#define SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
+#define SHOW_MODIFIED_BLOCKS_SHORT "-m"
+
+const char* const help = ("%s [--stat] [" SHOW_MODIFIED_BLOCKS_SHORT " | " SHOW_MODIFIED_BLOCKS "] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
 	"\nversion 1.0"
 	"\n"
 	"\nOptions:"
 	"\n\t--stat \toutput statistics"
+	"\n\t" SHOW_MODIFIED_BLOCKS_SHORT ", " SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
 );
 
 enum { bufferSize  = 1024UL * 1024UL };
@@ -58,9 +62,16 @@ int File_truncate(int fd) {
 #endif
 }
 
+
+
 #ifndef O_LARGEFILE
 	#warning No large file support
 	#define O_LARGEFILE 0
+	typedef uint32_t FileOffset;
+	#define FILE_OFFSET_PRINTF_FORMAT "%08X" 
+#else
+	typedef uint64_t FileOffset; 
+	#define FILE_OFFSET_PRINTF_FORMAT "%016llX" 
 #endif
 
 #ifndef O_NOATIME
@@ -71,12 +82,24 @@ int File_truncate(int fd) {
 int main(int argc, char *argv[]) {
 	const char* const selfName = argv[0];
 	
-	if(argc < 3) { printf(help, selfName); return 0; }
-
 	int argvFileIndex = 1;
 	
 	bool isPrintStat = false;
-	if(strcasecmp(argv[argvFileIndex], "--stat") == 0) { isPrintStat = true; argvFileIndex += 1; }
+	bool isShowModofiedBlocks = false;
+	
+	for(;;) {
+		
+		if(!(argvFileIndex < argc)) { break; };
+		
+		if(0) {  }
+		else if(strcasecmp(argv[argvFileIndex], "--stat") == 0) { isPrintStat = true; argvFileIndex += 1; }
+		else if(strcmp(argv[argvFileIndex], SHOW_MODIFIED_BLOCKS_SHORT) == 0 || strcmp(argv[argvFileIndex], SHOW_MODIFIED_BLOCKS) == 0) { isShowModofiedBlocks = true; argvFileIndex += 1; }
+		else {
+			break;
+		}
+	}
+	
+	if(!(argvFileIndex + 1 < argc)) { printf(help, selfName); return 0; }
 	
 	const char* const srcFilePath = argv[argvFileIndex];
 	const char* const destFilePath = argv[argvFileIndex + 1];
@@ -93,6 +116,7 @@ int main(int argc, char *argv[]) {
 	
 	unsigned int blocksCount = 0;
 	unsigned int modifiedBlocksCount = 0;
+	FileOffset offset = 0;
 	
 	for(;;) {
 		ssize_t srcReadedBytesCount = read(srcFile, srcBuffer, bufferSize);
@@ -102,10 +126,14 @@ int main(int argc, char *argv[]) {
 			lseek(destFile, -destReadedBytesCount, SEEK_CUR);
 			if(write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
 			modifiedBlocksCount += 1;
+			if(isShowModofiedBlocks) {
+				fprintf(stderr, "Modifed block " FILE_OFFSET_PRINTF_FORMAT  "\n", offset);
+			};
 		}
 		else {
 		}
 		blocksCount += 1; 
+		offset += srcReadedBytesCount;
 	}
 	
 	

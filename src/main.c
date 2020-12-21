@@ -66,10 +66,11 @@ int File_truncate(int fd) {
 
 int main(int argc, char *argv[]) {
 	const char* const selfName = argv[0];
-	const char* const srcFilePath = argv[1];
-	const char* const destFilePath = argv[2];
 	
 	if(argc < 3) { printf(help, selfName); return 0; }
+
+	const char* const srcFilePath = argv[1];
+	const char* const destFilePath = argv[2];
 	
 	int ret = 0;
 	uint8_t* srcBuffer;

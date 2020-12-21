@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 		if(!(argvFileIndex < argc)) { break; };
 		
 		if(0) {  }
-		else if(strcasecmp(argv[argvFileIndex], "--stat") == 0) { isPrintStat = true; argvFileIndex += 1; }
+		else if(strcmp(argv[argvFileIndex], "--stat") == 0) { isPrintStat = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], SHOW_MODIFIED_BLOCKS_SHORT) == 0 || strcmp(argv[argvFileIndex], SHOW_MODIFIED_BLOCKS) == 0) { isShowModofiedBlocks = true; argvFileIndex += 1; }
 		else {
 			break;

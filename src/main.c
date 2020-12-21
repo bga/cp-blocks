@@ -15,15 +15,19 @@
 */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-const char* const help = ("%s (srcFile | -) destFile"
+const char* const help = ("%s [--stat] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
 	"\nversion 1.0"
+	"\n"
+	"\nOptions:"
+	"\n\t--stat \toutput statistics"
 );
 
 enum { bufferSize  = 1024UL * 1024UL };
@@ -69,8 +73,13 @@ int main(int argc, char *argv[]) {
 	
 	if(argc < 3) { printf(help, selfName); return 0; }
 
-	const char* const srcFilePath = argv[1];
-	const char* const destFilePath = argv[2];
+	int argvFileIndex = 1;
+	
+	bool isPrintStat = false;
+	if(strcasecmp(argv[argvFileIndex], "--stat") == 0) { isPrintStat = true; argvFileIndex += 1; }
+	
+	const char* const srcFilePath = argv[argvFileIndex];
+	const char* const destFilePath = argv[argvFileIndex + 1];
 	
 	int ret = 0;
 	uint8_t* srcBuffer;
@@ -82,6 +91,9 @@ int main(int argc, char *argv[]) {
 	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : open(srcFilePath, O_RDONLY | O_LARGEFILE | O_NOATIME)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
 	int destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE | O_NOATIME); if(destFile < 0) { ret = Error_destOpenFailded; goto openDestFailed; }
 	
+	unsigned int blocksCount = 0;
+	unsigned int modifiedBlocksCount = 0;
+	
 	for(;;) {
 		ssize_t srcReadedBytesCount = read(srcFile, srcBuffer, bufferSize);
 		if(srcReadedBytesCount == 0) break;
@@ -89,9 +101,11 @@ int main(int argc, char *argv[]) {
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
 			lseek(destFile, -destReadedBytesCount, SEEK_CUR);
 			if(write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
+			modifiedBlocksCount += 1;
 		}
 		else {
 		}
+		blocksCount += 1; 
 	}
 	
 	
@@ -99,6 +113,16 @@ int main(int argc, char *argv[]) {
 		File_truncate(destFile);
 	}
 	
+	if(isPrintStat) {
+		fprintf(stderr, 
+			"Stat:" 
+			"\n\tblocks total: %u"
+			"\n\tblocks modified: %u"
+			"\n\tblocks modified ratio: %.2lf%%"
+			"\n", 
+			blocksCount, modifiedBlocksCount, ((double)modifiedBlocksCount) / blocksCount * 100
+		);
+	};
 	
 	noStorageSpace:
 	
@@ -132,6 +156,7 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Could not allocate memory for buffer\n");
 		}
 	}
+	
 	
 	return ret;
 }

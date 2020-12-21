@@ -93,6 +93,7 @@ test: test-data.bin
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+	$(RM) test-data.bin test-data.bin.copy
 
 MKDIR_P ?= mkdir -p
 

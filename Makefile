@@ -79,7 +79,17 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 
-.PHONY: clean list
+test-data.bin:
+	dd if=/dev/urandom of=test-data.bin bs=1M count=9
+
+test: test-data.bin
+	./cp-blocks.exe -m --stat test-data.bin test-data.bin.copy
+	@chmod u+w test-data.bin.copy
+	@echo
+	sha1sum test-data.bin 
+	sha1sum test-data.bin.copy 
+
+.PHONY: clean list test
 
 clean:
 	$(RM) -r $(BUILD_DIR)

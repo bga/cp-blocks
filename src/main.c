@@ -22,15 +22,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#define OPTION_STAT "--stat"
 #define SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
 #define SHOW_MODIFIED_BLOCKS_SHORT "-m"
 
-const char* const help = ("%s [--stat] [" SHOW_MODIFIED_BLOCKS_SHORT " | " SHOW_MODIFIED_BLOCKS "] (srcFile | -) destFile"
+const char* const help = ("%s [" OPTION_STAT "] [" SHOW_MODIFIED_BLOCKS_SHORT " | " SHOW_MODIFIED_BLOCKS "] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
 	"\nversion 1.0"
 	"\n"
 	"\nOptions:"
-	"\n\t--stat \toutput statistics"
+	"\n\t" OPTION_STAT " \toutput statistics"
 	"\n\t" SHOW_MODIFIED_BLOCKS_SHORT ", " SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
 );
 
@@ -92,7 +93,7 @@ int main(int argc, char *argv[]) {
 		if(!(argvFileIndex < argc)) { break; };
 		
 		if(0) {  }
-		else if(strcmp(argv[argvFileIndex], "--stat") == 0) { isPrintStat = true; argvFileIndex += 1; }
+		else if(strcmp(argv[argvFileIndex], OPTION_STAT) == 0) { isPrintStat = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], SHOW_MODIFIED_BLOCKS_SHORT) == 0 || strcmp(argv[argvFileIndex], SHOW_MODIFIED_BLOCKS) == 0) { isShowModofiedBlocks = true; argvFileIndex += 1; }
 		else {
 			break;

@@ -89,6 +89,13 @@ test: test-data.bin
 	sha1sum test-data.bin 
 	sha1sum test-data.bin.copy 
 
+test-split: test-data.bin
+	./cp-blocks.exe -m --split-size=2M --stat test-data.bin test-data.bin.copy
+	@chmod u+w test-data.bin.copy.*
+	@echo
+	sha1sum test-data.bin 
+	cat test-data.bin.copy.* | sha1sum 
+
 .PHONY: clean list test
 
 clean:

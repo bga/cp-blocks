@@ -26,6 +26,7 @@
 #include <limits.h>
 
 #define OPTION_SPLIT "--split-size="
+#define OPTION_SHOW_PROGRESS "--progress"
 #define OPTION_STAT "--stat"
 #define OPTION_SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
 #define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "-m"
@@ -36,6 +37,7 @@ const char* const help = ("%s [" OPTION_STAT "] [" OPTION_SHOW_MODIFIED_BLOCKS_S
 	"\n"
 	"\nOptions:"
 	"\n\t" OPTION_SPLIT "N(M | G) \tsplit to files destFile.%%03d"
+	"\n\t" OPTION_SHOW_PROGRESS " \tshow progress"
 	"\n\t" OPTION_STAT " \toutput statistics"
 	"\n\t" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
 );
@@ -99,6 +101,7 @@ int main(int argc, char *argv[]) {
 	FileOffset split_size = 0;
 	
 	bool isPrintStat = false;
+	bool isShowProgress = false;
 	bool isShowModofiedBlocks = false;
 	
 	int ret = 0;
@@ -139,6 +142,7 @@ int main(int argc, char *argv[]) {
 			argvFileIndex += 1; 
 		}
 		else if(strcmp(argv[argvFileIndex], OPTION_STAT) == 0) { isPrintStat = true; argvFileIndex += 1; }
+		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_PROGRESS) == 0) { isShowProgress = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_MODIFIED_BLOCKS_SHORT) == 0 || strcmp(argv[argvFileIndex], OPTION_SHOW_MODIFIED_BLOCKS) == 0) { isShowModofiedBlocks = true; argvFileIndex += 1; }
 		else {
 			break;
@@ -204,6 +208,18 @@ int main(int argc, char *argv[]) {
 		blocksCount += 1; 
 		offset += srcReadedBytesCount;
 		
+		if(isShowProgress) {
+			static int statusStringLen = 0; 
+			
+			//# clear last output
+			fputc('\r', stderr);
+			while(statusStringLen--) {
+				fputc(' ', stderr);
+			}
+			
+			statusStringLen = fprintf(stderr, "\r%s %luM", destFilePath, (bufferSize  / 1024UL / 1024UL) * blocksCount);
+		};
+
 		if(isSplit && split_size <= offset) {
 			closeDestFile();
 			
@@ -215,6 +231,10 @@ int main(int argc, char *argv[]) {
 	
 	closeDestFile();
 	
+	if(isShowProgress) {
+		fprintf(stderr, "\n");
+	};
+
 	if(isPrintStat) {
 		fprintf(stderr, 
 			"Stat:" 

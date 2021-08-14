@@ -52,6 +52,7 @@ enum {
 	Error_destOpenFailded = -3,  
 	Error_diskFull = -4,
 	Error_commandLineParse = -5,   
+	Error_ioGenericFailure = -6,   
 };
 
 int File_eof(int fd) {
@@ -209,8 +210,10 @@ int main(int argc, char *argv[]) {
 	
 	for(;;) {
 		ssize_t srcReadedBytesCount = File_read(srcFile, srcBuffer, bufferSize);
+		if(srcReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount == 0) break;
 		ssize_t destReadedBytesCount = File_read(destFile, destBuffer, srcReadedBytesCount);
+		if(destReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
 			lseek(destFile, -destReadedBytesCount, SEEK_CUR);
 			if(write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
@@ -263,6 +266,7 @@ int main(int argc, char *argv[]) {
 	};
 	
 	noStorageSpace:
+	ioError:
 	
 	close(destFile);
 	openDestFailed:
@@ -278,6 +282,9 @@ int main(int argc, char *argv[]) {
 	switch(ret) {
 		case(0): {
 			//# ok
+		} break;
+		case(Error_ioGenericFailure): {
+			fprintf(stderr, "Generic io error\n");
 		} break;
 		case(Error_commandLineParse): {
 			fprintf(stderr, "%s", commandLineErrorString);

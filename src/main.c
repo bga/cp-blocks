@@ -26,6 +26,7 @@
 #include <limits.h>
 
 #define OPTION_SPLIT "--split-size="
+#define OPTION_DRY_RUN "--dry-run"
 #define OPTION_SHOW_PROGRESS "--progress"
 #define OPTION_STAT "--stat"
 #define OPTION_SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
@@ -37,6 +38,7 @@ const char* const help = ("%s [" OPTION_STAT "] [" OPTION_SHOW_MODIFIED_BLOCKS_S
 	"\n"
 	"\nOptions:"
 	"\n\t" OPTION_SPLIT "N(M | G) \tsplit to files destFile.%%03d"
+	"\n\t" OPTION_DRY_RUN " \tdry run"
 	"\n\t" OPTION_SHOW_PROGRESS " \tshow progress"
 	"\n\t" OPTION_STAT " \toutput statistics"
 	"\n\t" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
@@ -117,6 +119,7 @@ int main(int argc, char *argv[]) {
 	int split_index = 0;
 	FileOffset split_size = 0;
 	
+	bool isDryRun = false;
 	bool isPrintStat = false;
 	bool isShowProgress = false;
 	bool isShowModofiedBlocks = false;
@@ -159,6 +162,7 @@ int main(int argc, char *argv[]) {
 			argvFileIndex += 1; 
 		}
 		else if(strcmp(argv[argvFileIndex], OPTION_STAT) == 0) { isPrintStat = true; argvFileIndex += 1; }
+		else if(strcmp(argv[argvFileIndex], OPTION_DRY_RUN) == 0) { isDryRun = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_PROGRESS) == 0) { isShowProgress = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_MODIFIED_BLOCKS_SHORT) == 0 || strcmp(argv[argvFileIndex], OPTION_SHOW_MODIFIED_BLOCKS) == 0) { isShowModofiedBlocks = true; argvFileIndex += 1; }
 		else {
@@ -216,7 +220,7 @@ int main(int argc, char *argv[]) {
 		if(destReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
 			lseek(destFile, -destReadedBytesCount, SEEK_CUR);
-			if(write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
+			if(!isDryRun && write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
 			modifiedBlocksCount += 1;
 			if(isShowModofiedBlocks) {
 				fprintf(stderr, "Modifed block " FILE_OFFSET_PRINTF_FORMAT  "\n", offset);

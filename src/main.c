@@ -90,6 +90,22 @@ int File_truncate(int fd) {
 	#define O_NOATIME 0
 #endif
 
+ssize_t File_read(int file, uint8_t* buffer, size_t bufferSize) {
+	size_t bufferOffset = 0;
+	
+	for(;;) {	
+		ssize_t readedBytesCount = read(file, &(buffer[bufferOffset]), bufferSize - bufferOffset);
+		//# error?
+		if(readedBytesCount < 0) return readedBytesCount;
+		//# eof?
+		if(readedBytesCount == 0) break;
+		bufferOffset += readedBytesCount;
+		if(bufferSize <= bufferOffset) break;
+	}
+	
+	return bufferOffset;
+}
+
 int main(int argc, char *argv[]) {
 	const char* const selfName = argv[0];
 	
@@ -192,9 +208,9 @@ int main(int argc, char *argv[]) {
 	FileOffset offset = 0;
 	
 	for(;;) {
-		ssize_t srcReadedBytesCount = read(srcFile, srcBuffer, bufferSize);
+		ssize_t srcReadedBytesCount = File_read(srcFile, srcBuffer, bufferSize);
 		if(srcReadedBytesCount == 0) break;
-		ssize_t destReadedBytesCount = read(destFile, destBuffer, srcReadedBytesCount);
+		ssize_t destReadedBytesCount = File_read(destFile, destBuffer, srcReadedBytesCount);
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
 			lseek(destFile, -destReadedBytesCount, SEEK_CUR);
 			if(write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }

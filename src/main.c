@@ -32,7 +32,7 @@
 #define OPTION_SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
 #define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "-m"
 
-const char* const help = ("%s [" OPTION_STAT "] [" OPTION_SHOW_MODIFIED_BLOCKS_SHORT " | " OPTION_SHOW_MODIFIED_BLOCKS "] (srcFile | -) destFile"
+const char* const help = ("%s [options] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
 	"\nversion 1.0"
 	"\n"

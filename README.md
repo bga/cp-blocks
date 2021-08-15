@@ -1,7 +1,7 @@
 Smart CLI copy file tool. POSIX compliant. Overwrites only changed clusters in destFile. Supports stdin
 
 ```
-cp-blocks [--stat] [-m | --show-modified-blocks] (srcFile | -) destFile
+cp-blocks [options] (srcFile | -) destFile
 copy srcFile to destFile but do not overwrite same blocks
 version 1.0
 

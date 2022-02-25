@@ -252,6 +252,7 @@ int main(int argc, char *argv[]) {
 	unsigned int blocksCount = 0;
 	unsigned int modifiedBlocksCount = 0;
 	FileOffset offset = 0;
+	FileOffset nextSplitSizeBound = split_size;
 	
 	for(;;) {
 		File_AsyncRequest srcReadAsyncRequest = File_readAnync(srcFile, srcBuffer, bufferSize);
@@ -287,7 +288,8 @@ int main(int argc, char *argv[]) {
 			statusStringLen = fprintf(stderr, "\r%s %luM", destFilePath, (bufferSize  / 1024UL / 1024UL) * blocksCount);
 		};
 
-		if(isSplit && split_size <= offset) {
+		if(isSplit && nextSplitSizeBound <= offset) {
+			nextSplitSizeBound += split_size;
 			closeDestFile();
 			
 			split_index += 1;

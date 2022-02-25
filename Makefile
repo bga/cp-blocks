@@ -43,6 +43,7 @@ CPPFLAGS += -I$(PLATFORM)/include -Iinclude -I../../$(PLATFORM)/include -I../../
 CPPFLAGS += -fPIC
 # CPPFLAGS += -o .obj/$(@F)
 CPPFLAGS += -fdollars-in-identifiers
+CPPFLAGS += -pthread 
 
 ifdef DEBUG
 	CPPFLAGS += -ggdb -DDEBUG -Og
@@ -57,6 +58,7 @@ CPPFLAGS += -MMD -MP
 
 
 # LDFLAGS += -L../../lib/$(PLATFORM)/$(ARCH) -L../../../../!cpp/lib/$(PLATFORM)/$(ARCH) 
+LDFLAGS += -lpthread 
 
 all: $(TARGET_EXEC)
 

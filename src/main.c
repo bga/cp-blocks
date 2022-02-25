@@ -21,9 +21,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <pthread.h>
 
 //#define _POSIX_C_SOURCE 1
 #include <limits.h>
+
+#define MALLOC_TYPE(typeArg) ((typeArg*)malloc(sizeof(typeArg)))
 
 #define OPTION_SPLIT "--split-size="
 #define OPTION_DRY_RUN "--dry-run"
@@ -107,6 +110,44 @@ ssize_t File_read(int file, uint8_t* buffer, size_t bufferSize) {
 	}
 	
 	return bufferOffset;
+}
+
+typedef struct File_AsyncRequest {
+	pthread_t thread;
+} File_AsyncRequest;
+struct File_readAnync_thread_Request {
+	int file; uint8_t* buffer; size_t bufferSize;
+};
+struct File_readAnync_thread_Result {
+	ssize_t bytesCount;
+};
+ssize_t File_AsyncRequest_wait(File_AsyncRequest asyncRequest) {
+	struct File_readAnync_thread_Result* retPtr = NULL;
+	
+	pthread_join(asyncRequest.thread, (void**)&retPtr);
+	if(retPtr == NULL) return -1;
+	ssize_t bytesCount = retPtr->bytesCount;
+	free((void*)retPtr);
+	return bytesCount;
+}
+static void* File_readAnync_thread(void* dataPtr) {
+	struct File_readAnync_thread_Request data = *(struct File_readAnync_thread_Request*)dataPtr;
+	free(dataPtr);
+	struct File_readAnync_thread_Result* retPtr = MALLOC_TYPE(struct File_readAnync_thread_Result);
+	retPtr ->bytesCount = File_read(data.file, data.buffer, data.bufferSize);
+	
+	return (void*)retPtr;
+}
+File_AsyncRequest File_readAnync(int file, uint8_t* buffer, size_t bufferSize) {
+	struct File_readAnync_thread_Request* dataPtr = MALLOC_TYPE(struct File_readAnync_thread_Request);
+	
+	dataPtr->file = file;
+	dataPtr->buffer = buffer;
+	dataPtr->bufferSize = bufferSize;
+	
+	File_AsyncRequest asyncRequest; pthread_create(&(asyncRequest.thread), NULL, File_readAnync_thread, (void *)dataPtr);
+	
+	return asyncRequest;
 }
 
 int main(int argc, char *argv[]) {
@@ -213,10 +254,13 @@ int main(int argc, char *argv[]) {
 	FileOffset offset = 0;
 	
 	for(;;) {
-		ssize_t srcReadedBytesCount = File_read(srcFile, srcBuffer, bufferSize);
+		File_AsyncRequest srcReadAsyncRequest = File_readAnync(srcFile, srcBuffer, bufferSize);
+		File_AsyncRequest destReadAsyncRequest = File_readAnync(destFile, destBuffer, bufferSize);
+		ssize_t srcReadedBytesCount = File_AsyncRequest_wait(srcReadAsyncRequest);
+		ssize_t destReadedBytesCount = File_AsyncRequest_wait(destReadAsyncRequest);
+		
 		if(srcReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount == 0) break;
-		ssize_t destReadedBytesCount = File_read(destFile, destBuffer, srcReadedBytesCount);
 		if(destReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
 			lseek(destFile, -destReadedBytesCount, SEEK_CUR);

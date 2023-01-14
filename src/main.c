@@ -31,6 +31,7 @@
 #define OPTION_SPLIT "--split-size="
 #define OPTION_DRY_RUN "--dry-run"
 #define OPTION_SHOW_PROGRESS "--progress"
+#define OPTION_RET_TRUE_IF_MODIFIED "--return-true-if-modified"
 #define OPTION_STAT "--stat"
 #define OPTION_SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
 #define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "-m"
@@ -43,6 +44,7 @@ const char* const help = ("%s [options] (srcFile | -) destFile"
 	"\n\t" OPTION_SPLIT "N(M | G) \tsplit to files destFile.%%03d"
 	"\n\t" OPTION_DRY_RUN " \tdry run"
 	"\n\t" OPTION_SHOW_PROGRESS " \tshow progress"
+	"\n\t" OPTION_RET_TRUE_IF_MODIFIED " \treturn true if modified"
 	"\n\t" OPTION_STAT " \toutput statistics"
 	"\n\t" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
 );
@@ -58,6 +60,8 @@ enum {
 	Error_diskFull = -4,
 	Error_commandLineParse = -5,   
 	Error_ioGenericFailure = -6,   
+	
+	Error_notModified = 1,
 };
 
 int File_eof(int fd) {
@@ -164,6 +168,7 @@ int main(int argc, char *argv[]) {
 	bool isPrintStat = false;
 	bool isShowProgress = false;
 	bool isShowModofiedBlocks = false;
+	bool isRetTrueIfModified = false;
 	
 	int ret = 0;
 
@@ -202,6 +207,7 @@ int main(int argc, char *argv[]) {
 			}
 			argvFileIndex += 1; 
 		}
+		else if(strcmp(argv[argvFileIndex], OPTION_RET_TRUE_IF_MODIFIED) == 0) { isRetTrueIfModified = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], OPTION_STAT) == 0) { isPrintStat = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], OPTION_DRY_RUN) == 0) { isDryRun = true; argvFileIndex += 1; }
 		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_PROGRESS) == 0) { isShowProgress = true; argvFileIndex += 1; }
@@ -360,6 +366,9 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
+	if(isRetTrueIfModified && ret == 0 && modifiedBlocksCount == 0) {
+		ret = Error_notModified;
+	};
 	
 	return ret;
 }

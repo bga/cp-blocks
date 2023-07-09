@@ -36,7 +36,7 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 #CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
-CPPFLAGS += -Wall -Wextra -pedantic
+CPPFLAGS += -Wall -Wextra
 CPPFLAGS += -Wno-unused-variable -Wno-unused-parameter
 # CPPFLAGS += -D_WIN32 
 CPPFLAGS += -I$(PLATFORM)/include -Iinclude -I../../$(PLATFORM)/include -I../../include -I../../../../!cpp/include
@@ -44,6 +44,7 @@ CPPFLAGS += -fPIC
 # CPPFLAGS += -o .obj/$(@F)
 CPPFLAGS += -fdollars-in-identifiers
 CPPFLAGS += -pthread 
+CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE 
 
 ifdef DEBUG
 	CPPFLAGS += -ggdb -DDEBUG -Og

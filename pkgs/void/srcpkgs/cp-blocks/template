@@ -2,22 +2,16 @@
 pkgname=cp-blocks
 version=1.0
 revision=1
-# build_wrksrc="cp-blocks"
 build_style=gnu-makefile
 make_build_args="TARGET_EXEC=cp-blocks PLATFORM=linux TEMP=$XBPS_SRCPKGDIR"
 make_use_env=yes
-# makedepends="SDL2-devel libmad-devel"
-short_desc="Smart CLI copy file tool. Overwrites only changed clusters in destFile. Supports stdin and destFile spliting"
+short_desc="Smart CLI copy file tool. Overwrites only changed clusters in destFile. Supports stdin and destFile splitting"
 maintainer="Bga <bga.email@gmail.com>"
 license="Apache-2.0"
 homepage="http://github.com/bga/cp-blocks"
-#changelog="http://quakespasm.sourceforge.net/Quakespasm.html#s5"
-# distfiles="${SOURCEFORGE_SITE}/quakespasm/Source/quakespasm-${version}.tar.gz"
 distfiles="http://github.com/bga/cp-blocks/archive/f73a121803e0ff6606341bf91a24e593dcc09b67.tar.gz"
 checksum=be45b53b50047baf6de1092ab966b88fbae4e9285a2f427ab777687bfeac3c08
 
 do_install() {
 	vbin cp-blocks
-	# vinstall ../Misc/QuakeSpasm_512.png 644 usr/share/pixmaps quakespasm.png
-	# vinstall ${FILESDIR}/quakespasm.desktop 644 usr/share/applications
 }

@@ -1,4 +1,4 @@
-Smart CLI copy file tool. POSIX compliant. Overwrites only changed clusters in destFile. Supports stdin
+Smart CLI copy file tool. POSIX compliant. Overwrites only changed clusters in destFile. Supports stdin. Supports destFile spitting.
 
 ```
 cp-blocks [options] (srcFile | -) destFile

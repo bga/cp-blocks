@@ -15,6 +15,7 @@
 */
 
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,10 +90,13 @@ int File_truncate(int fd) {
 	#warning No large file support
 	#define O_LARGEFILE 0
 	typedef uint32_t FileOffset;
-	#define FILE_OFFSET_PRINTF_FORMAT "%08X" 
+	#define FILE_OFFSET_PRINTF_FORMAT "%08"PRIX32 
+	#define FILE_OFFSET_SCANF_FORMAT "%"SCNu32
+
 #else
 	typedef uint64_t FileOffset; 
-	#define FILE_OFFSET_PRINTF_FORMAT "%016llX" 
+	#define FILE_OFFSET_PRINTF_FORMAT "%016"PRIX64
+	#define FILE_OFFSET_SCANF_FORMAT "%"SCNu64
 #endif
 
 #ifndef O_NOATIME
@@ -183,7 +187,7 @@ int main(int argc, char *argv[]) {
 			
 			char postfix;
 			FileOffset postfixMultiplier = 1;
-			if(sscanf(valueStr, "%u%c", &split_size, &postfix) != 2) {
+			if(sscanf(valueStr, FILE_OFFSET_SCANF_FORMAT "%c", &split_size, &postfix) != 2) {
 				commandLineErrorString = strdup("Could not parse --split-size\n");
 				ret = Error_commandLineParse;
 				goto commandLineError;
@@ -197,8 +201,8 @@ int main(int argc, char *argv[]) {
 						postfixMultiplier = 1024 * 1024 * 1024;
 					} break;
 					default: {
-						const char* fmt = "Could not parse --split-size postfix %c\n";
-						sprintf((commandLineErrorString = malloc(strlen_static(fmt + 1))), fmt, postfix);
+						const char fmt[] = "Could not parse --split-size postfix %c\n";
+						sprintf((commandLineErrorString = malloc(strlen_static(fmt) + 1)), fmt, postfix);
 						ret = Error_commandLineParse;
 						goto commandLineError;
 					}	

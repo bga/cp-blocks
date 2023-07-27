@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
 			strcpy(destFilePath, destFilePathTml);
 		}
 		
-		destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE | O_NOATIME);
+		destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE | O_NOATIME, 0666);
 	};
 	void closeDestFile() {
 		if(destFile < 0) return;

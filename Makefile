@@ -86,14 +86,14 @@ test-data.bin:
 	dd if=/dev/urandom of=test-data.bin bs=1M count=9
 
 test: test-data.bin
-	./cp-blocks.exe -m --stat test-data.bin test-data.bin.copy
+	./$(TARGET_EXEC) -m --stat test-data.bin test-data.bin.copy
 	@chmod u+w test-data.bin.copy
 	@echo
 	sha1sum test-data.bin 
 	sha1sum test-data.bin.copy 
 
 test-split: test-data.bin
-	./cp-blocks.exe -m --split-size=2M --stat test-data.bin test-data.bin.copy
+	./$(TARGET_EXEC) -m --split-size=2M --stat test-data.bin test-data.bin.copy
 	@chmod u+w test-data.bin.copy.*
 	@echo
 	sha1sum test-data.bin 

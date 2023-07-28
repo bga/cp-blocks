@@ -8,9 +8,9 @@ make_use_env=yes
 short_desc="Smart CLI copy file tool. Overwrites only changed clusters in destFile. Supports stdin and destFile splitting"
 maintainer="Bga <bga.email@gmail.com>"
 license="Apache-2.0"
-homepage="http://github.com/bga/cp-blocks"
-distfiles="http://github.com/bga/cp-blocks/archive/f73a121803e0ff6606341bf91a24e593dcc09b67.tar.gz"
-checksum=be45b53b50047baf6de1092ab966b88fbae4e9285a2f427ab777687bfeac3c08
+homepage="https://github.com/bga/cp-blocks"
+distfiles="https://github.com/bga/cp-blocks/archive/cb2f915479d9a7ed69bbc6aceea09cb6ec47fc10.tar.gz"
+checksum=cf12ad711affd955394a35356b471afdde680779d219d5a975ad8f600f72bfb1
 
 do_install() {
 	vbin cp-blocks

@@ -44,7 +44,7 @@
 #define OPTION_SHOW_MODIFIED_BLOCKS "show-modified-blocks"
 #define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "m"
 
-const char* const help = ("%s [options] (srcFile | -) destFile"
+const char help[] = ("%s [options] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
 	"\nversion " VERSION
 	"\n"

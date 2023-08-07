@@ -181,6 +181,7 @@ int main(int argc, char *argv[]) {
 	bool isShowModofiedBlocks = false;
 	bool isRetTrueIfModified = false;
 	
+	unsigned int modifiedBlocksCount = 0;
 	
 	int ret = 0;
 
@@ -307,7 +308,6 @@ int main(int argc, char *argv[]) {
 	if(destFile < 0) { ret = Error_destOpenFailded; goto openDestFailed; }
 	
 	unsigned int blocksCount = 0;
-	unsigned int modifiedBlocksCount = 0;
 	FileOffset offset = 0;
 	FileOffset nextSplitSizeBound = split_size;
 	

@@ -394,8 +394,8 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Generic io error\n");
 		} break;
 		case(Error_commandLineParse): {
-			fprintf(stderr, "%s", commandLineErrorString);
 			if(commandLineErrorString != NULL) {
+				fprintf(stderr, "%s", commandLineErrorString);
 				free(commandLineErrorString);
 				commandLineErrorString = NULL;
 			};

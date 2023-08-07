@@ -55,6 +55,7 @@ const char* const help = ("%s [options] (srcFile | -) destFile"
 	"\n\t" "-" OPTION_RET_TRUE_IF_MODIFIED_SHORT ", " "--" OPTION_RET_TRUE_IF_MODIFIED " \treturn true if modified"
 	"\n\t" "-" OPTION_STAT_SHORT ", " "--" OPTION_STAT " \toutput statistics"
 	"\n\t" "--" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " "--" OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
+	"\n"
 );
 
 #define strlen_static(strArg) (sizeof((strArg)) - 1)

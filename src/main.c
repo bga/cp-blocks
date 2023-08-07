@@ -46,15 +46,15 @@
 
 const char* const help = ("%s [options] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
-	"\nversion 1.0"
+	"\nversion " VERSION
 	"\n"
 	"\nOptions:"
-	"\n\t" "-" OPTION_SPLIT_SHORT ", " "--" OPTION_SPLIT "N(M | G) \tsplit to files destFile.%%03d"
-	"\n\t" "-" OPTION_DRY_RUN_SHORT ", " "--" OPTION_DRY_RUN " \tdry run"
-	"\n\t" "-" OPTION_SHOW_PROGRESS_SHORT ", " "--" OPTION_SHOW_PROGRESS " \tshow progress"
+	"\n\t" "-" OPTION_SPLIT_SHORT ", " "--" OPTION_SPLIT " N(M | G) \tsplit to files destFile.%%03d"
+	"\n\t" "-" OPTION_DRY_RUN_SHORT ", " "--" OPTION_DRY_RUN " \t\t\tdry run"
+	"\n\t" "-" OPTION_SHOW_PROGRESS_SHORT ", " "--" OPTION_SHOW_PROGRESS " \t\t\tshow progress"
 	"\n\t" "-" OPTION_RET_TRUE_IF_MODIFIED_SHORT ", " "--" OPTION_RET_TRUE_IF_MODIFIED " \treturn true if modified"
-	"\n\t" "-" OPTION_STAT_SHORT ", " "--" OPTION_STAT " \toutput statistics"
-	"\n\t" "--" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " "--" OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
+	"\n\t" "-" OPTION_STAT_SHORT ", " "--" OPTION_STAT " \t\t\toutput statistics"
+	"\n\t" "-" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " "--" OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
 	"\n"
 );
 

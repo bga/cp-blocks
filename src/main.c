@@ -268,8 +268,16 @@ int main(int argc, char *argv[]) {
 	}
 	argvFileIndex = optind;
 
-	
-	if(!(argvFileIndex + 1 < argc)) { printf(help, selfName); return 0; }
+	if(argc <= argvFileIndex) { 
+		commandLineErrorString = strdup("Missed srcFile and destFile\n");
+		ret = Error_commandLineParse;
+		goto commandLineError;
+	};
+	if(argc - 1 <= argvFileIndex) { 
+		commandLineErrorString = strdup("Missed destFile\n");
+		ret = Error_commandLineParse;
+		goto commandLineError;
+	};
 	
 	const char* const srcFilePath = argv[argvFileIndex];
 	const char* const destFilePathTml = argv[argvFileIndex + 1];
@@ -398,7 +406,9 @@ int main(int argc, char *argv[]) {
 				fprintf(stderr, "%s", commandLineErrorString);
 				free(commandLineErrorString);
 				commandLineErrorString = NULL;
+				
 			};
+			printf(help, selfName);
 		} break;
 		case(Error_noMemory): {
 			fprintf(stderr, "Could not allocate memory for buffer\n");

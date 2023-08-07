@@ -28,7 +28,7 @@ PLATFORM ?= windows
 BUILD_DIR ?= $(TEMP)/$(PROJECT)
 SRC_DIRS ?= ./src
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+SRCS := $(shell find $(SRC_DIRS) -name '*.cpp' -or -name '*.c' -or -name '*.s' | grep -Fv '.bak.')
 OBJS := $(subst \,/,$(SRCS:%=$(BUILD_DIR)/%.o))
 DEPS := $(OBJS:.o=.d)
 

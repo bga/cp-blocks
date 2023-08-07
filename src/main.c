@@ -24,30 +24,37 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include <getopt.h>
+
 //#define _POSIX_C_SOURCE 1
 #include <limits.h>
 
 #define MALLOC_TYPE(typeArg) ((typeArg*)malloc(sizeof(typeArg)))
 
-#define OPTION_SPLIT "--split-size="
-#define OPTION_DRY_RUN "--dry-run"
-#define OPTION_SHOW_PROGRESS "--progress"
-#define OPTION_RET_TRUE_IF_MODIFIED "--return-true-if-modified"
-#define OPTION_STAT "--stat"
-#define OPTION_SHOW_MODIFIED_BLOCKS "--show-modified-blocks"
-#define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "-m"
+#define OPTION_SPLIT "split-size"
+#define OPTION_SPLIT_SHORT "S"
+#define OPTION_DRY_RUN "dry-run"
+#define OPTION_DRY_RUN_SHORT "n"
+#define OPTION_SHOW_PROGRESS "progress"
+#define OPTION_SHOW_PROGRESS_SHORT "#"
+#define OPTION_RET_TRUE_IF_MODIFIED "return-true-if-modified"
+#define OPTION_RET_TRUE_IF_MODIFIED_SHORT "r"
+#define OPTION_STAT "stat"
+#define OPTION_STAT_SHORT "s"
+#define OPTION_SHOW_MODIFIED_BLOCKS "show-modified-blocks"
+#define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "m"
 
 const char* const help = ("%s [options] (srcFile | -) destFile"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
 	"\nversion 1.0"
 	"\n"
 	"\nOptions:"
-	"\n\t" OPTION_SPLIT "N(M | G) \tsplit to files destFile.%%03d"
-	"\n\t" OPTION_DRY_RUN " \tdry run"
-	"\n\t" OPTION_SHOW_PROGRESS " \tshow progress"
-	"\n\t" OPTION_RET_TRUE_IF_MODIFIED " \treturn true if modified"
-	"\n\t" OPTION_STAT " \toutput statistics"
-	"\n\t" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
+	"\n\t" "-" OPTION_SPLIT_SHORT ", " "--" OPTION_SPLIT "N(M | G) \tsplit to files destFile.%%03d"
+	"\n\t" "-" OPTION_DRY_RUN_SHORT ", " "--" OPTION_DRY_RUN " \tdry run"
+	"\n\t" "-" OPTION_SHOW_PROGRESS_SHORT ", " "--" OPTION_SHOW_PROGRESS " \tshow progress"
+	"\n\t" "-" OPTION_RET_TRUE_IF_MODIFIED_SHORT ", " "--" OPTION_RET_TRUE_IF_MODIFIED " \treturn true if modified"
+	"\n\t" "-" OPTION_STAT_SHORT ", " "--" OPTION_STAT " \toutput statistics"
+	"\n\t" "--" OPTION_SHOW_MODIFIED_BLOCKS_SHORT ", " "--" OPTION_SHOW_MODIFIED_BLOCKS " \tdump modified blocks offsets"
 );
 
 #define strlen_static(strArg) (sizeof((strArg)) - 1)
@@ -174,21 +181,50 @@ int main(int argc, char *argv[]) {
 	bool isShowModofiedBlocks = false;
 	bool isRetTrueIfModified = false;
 	
+	
 	int ret = 0;
 
+	
 	for(;;) {
+		static struct option long_options[] = {
+			{ OPTION_SPLIT, required_argument, NULL, OPTION_SPLIT_SHORT[0] },
+			{ OPTION_DRY_RUN, no_argument, NULL, OPTION_DRY_RUN_SHORT[0] },
+			{ OPTION_SHOW_PROGRESS, no_argument, NULL, OPTION_SHOW_PROGRESS_SHORT[0] },
+			{ OPTION_RET_TRUE_IF_MODIFIED, no_argument, NULL, OPTION_RET_TRUE_IF_MODIFIED_SHORT[0] },
+			{ OPTION_STAT, no_argument, NULL, OPTION_STAT_SHORT[0] },
+			{ OPTION_SHOW_MODIFIED_BLOCKS, no_argument, NULL, OPTION_SHOW_MODIFIED_BLOCKS_SHORT[0] },
+			{0, 0, 0, 0}
+		};
 		
-		if(!(argvFileIndex < argc)) { break; };
+		static char const options_short[] = (
+			OPTION_SPLIT_SHORT ":"
+			OPTION_DRY_RUN_SHORT
+			OPTION_SHOW_PROGRESS_SHORT
+			OPTION_RET_TRUE_IF_MODIFIED_SHORT
+			OPTION_STAT_SHORT
+			OPTION_SHOW_MODIFIED_BLOCKS_SHORT
+		);
+
 		
+		//# getopt_long stores the option index here
+		// int option_index = 0;
+		
+		int c = getopt_long(argc, argv, options_short, long_options, NULL);
+		
+		//# sorry C string literal is not constant so i can not use { switch(c) case OPTION_DRY_RUN_SHORT[0]: }
 		if(0) {  }
-		else if(strncmp(argv[argvFileIndex], OPTION_SPLIT, strlen_static(OPTION_SPLIT)) == 0) { 
-			const char* valueStr = &(argv[argvFileIndex][strlen_static(OPTION_SPLIT)]);
-			isSplit = true; 
-			
+		else if(c == -1) {
+			break;
+		}
+		else if(c == OPTION_SPLIT_SHORT[0]) { 
+			const char* valueStr = optarg;
+
+			isSplit = true;
+		
 			char postfix;
 			FileOffset postfixMultiplier = 1;
 			if(sscanf(valueStr, FILE_OFFSET_SCANF_FORMAT "%c", &split_size, &postfix) != 2) {
-				commandLineErrorString = strdup("Could not parse --split-size\n");
+				commandLineErrorString = strdup("Could not parse --" OPTION_SPLIT "\n");
 				ret = Error_commandLineParse;
 				goto commandLineError;
 			}
@@ -201,7 +237,7 @@ int main(int argc, char *argv[]) {
 						postfixMultiplier = 1024 * 1024 * 1024;
 					} break;
 					default: {
-						const char fmt[] = "Could not parse --split-size postfix %c\n";
+						const char fmt[] = "Could not parse --" OPTION_SPLIT " postfix %c\n";
 						sprintf((commandLineErrorString = malloc(strlen_static(fmt) + 1)), fmt, postfix);
 						ret = Error_commandLineParse;
 						goto commandLineError;
@@ -209,17 +245,28 @@ int main(int argc, char *argv[]) {
 				}
 				split_size *= postfixMultiplier;
 			}
-			argvFileIndex += 1; 
-		}
-		else if(strcmp(argv[argvFileIndex], OPTION_RET_TRUE_IF_MODIFIED) == 0) { isRetTrueIfModified = true; argvFileIndex += 1; }
-		else if(strcmp(argv[argvFileIndex], OPTION_STAT) == 0) { isPrintStat = true; argvFileIndex += 1; }
-		else if(strcmp(argv[argvFileIndex], OPTION_DRY_RUN) == 0) { isDryRun = true; argvFileIndex += 1; }
-		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_PROGRESS) == 0) { isShowProgress = true; argvFileIndex += 1; }
-		else if(strcmp(argv[argvFileIndex], OPTION_SHOW_MODIFIED_BLOCKS_SHORT) == 0 || strcmp(argv[argvFileIndex], OPTION_SHOW_MODIFIED_BLOCKS) == 0) { isShowModofiedBlocks = true; argvFileIndex += 1; }
+
+		} 
+		
+		else if(c == OPTION_DRY_RUN_SHORT[0]) { isDryRun = true; }
+		else if(c == OPTION_SHOW_PROGRESS_SHORT[0]) { isShowProgress = true; }
+		else if(c == OPTION_RET_TRUE_IF_MODIFIED_SHORT[0]) { isRetTrueIfModified = true; }
+		else if(c == OPTION_STAT_SHORT[0]) { isPrintStat = true; }
+		else if(c == OPTION_SHOW_MODIFIED_BLOCKS_SHORT[0]) { isShowModofiedBlocks = true; }
+		
+		else if(c == '?') {
+			ret = Error_commandLineParse;
+			goto commandLineError;
+			//# getopt_long already printed an error message
+		} 
+			
 		else {
-			break;
+			ret = Error_commandLineParse;
+			goto commandLineError;
 		}
 	}
+	argvFileIndex = optind;
+
 	
 	if(!(argvFileIndex + 1 < argc)) { printf(help, selfName); return 0; }
 	

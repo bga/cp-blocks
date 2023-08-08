@@ -9,8 +9,8 @@ short_desc="Smart CLI copy file tool. Overwrites only changed clusters in destFi
 maintainer="Bga <bga.email@gmail.com>"
 license="Apache-2.0"
 homepage="https://github.com/bga/cp-blocks"
-distfiles="$homepage/archive/vv$version.tar.gz"
-checksum=8f78f6ad64429952374fd81bf9f85483230eef49272018fed469dd3465c7a3db
+distfiles="$homepage/archive/v$version.tar.gz"
+checksum=35727b7f0d9258ef3f6d4038d47a131b5f00aa039c847bba1e5b4f4d88c3a89a
 
 do_install() {
 	vbin cp-blocks

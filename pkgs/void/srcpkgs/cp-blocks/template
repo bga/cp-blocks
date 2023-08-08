@@ -1,16 +1,16 @@
 # Template file for 'cp-blocks'
 pkgname=cp-blocks
-version=1.0
+version=1.1.2
 revision=1
 build_style=gnu-makefile
-make_build_args="TARGET_EXEC=cp-blocks PLATFORM=linux TEMP=$XBPS_SRCPKGDIR"
+make_build_args="TARGET_EXEC=cp-blocks PLATFORM=linux TEMP=${XBPS_BUILDDIR}/${wrksrc}"
 make_use_env=yes
 short_desc="Smart CLI copy file tool. Overwrites only changed clusters in destFile. Supports stdin and destFile splitting"
 maintainer="Bga <bga.email@gmail.com>"
 license="Apache-2.0"
 homepage="https://github.com/bga/cp-blocks"
-distfiles="https://github.com/bga/cp-blocks/archive/cb2f915479d9a7ed69bbc6aceea09cb6ec47fc10.tar.gz"
-checksum=cf12ad711affd955394a35356b471afdde680779d219d5a975ad8f600f72bfb1
+distfiles="$homepage/archive/vv$version.tar.gz"
+checksum=8f78f6ad64429952374fd81bf9f85483230eef49272018fed469dd3465c7a3db
 
 do_install() {
 	vbin cp-blocks

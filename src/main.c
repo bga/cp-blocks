@@ -330,7 +330,10 @@ int main(int argc, char *argv[]) {
 		
 		if(srcReadedBytesCount == 0) break;
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
-			if(!isDryRun && write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
+			if(isDryRun) {
+				lseek(destFile, srcReadedBytesCount, SEEK_CUR);
+			}
+			else if(write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
 			modifiedBlocksCount += 1;
 			if(isShowModofiedBlocks) {
 				fprintf(stderr, "Modifed block " FILE_OFFSET_PRINTF_FORMAT  "\n", offset);

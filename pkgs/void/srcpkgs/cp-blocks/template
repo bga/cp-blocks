@@ -1,6 +1,6 @@
 # Template file for 'cp-blocks'
 pkgname=cp-blocks
-version=1.1.2
+version=1.1.3
 revision=1
 build_style=gnu-makefile
 make_build_args="TARGET_EXEC=cp-blocks PLATFORM=linux TEMP=${XBPS_BUILDDIR}/${wrksrc}"
@@ -10,7 +10,7 @@ maintainer="Bga <bga.email@gmail.com>"
 license="Apache-2.0"
 homepage="https://github.com/bga/cp-blocks"
 distfiles="$homepage/archive/v$version.tar.gz"
-checksum=35727b7f0d9258ef3f6d4038d47a131b5f00aa039c847bba1e5b4f4d88c3a89a
+checksum=3f1f6a9baa22b2a84d62186e85389a9a9b96c0ba581d8522da90d0c7ca452635
 
 do_install() {
 	vbin cp-blocks

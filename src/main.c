@@ -325,12 +325,11 @@ int main(int argc, char *argv[]) {
 		File_AsyncRequest destReadAsyncRequest = File_readAnync(destFile, destBuffer, bufferSize);
 		ssize_t srcReadedBytesCount = File_AsyncRequest_wait(srcReadAsyncRequest);
 		ssize_t destReadedBytesCount = File_AsyncRequest_wait(destReadAsyncRequest);
+		if(srcReadedBytesCount < 0 || destReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
+		lseek(destFile, -destReadedBytesCount, SEEK_CUR);
 		
-		if(srcReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount == 0) break;
-		if(destReadedBytesCount < 0) { ret = Error_ioGenericFailure; goto ioError; }
 		if(srcReadedBytesCount != destReadedBytesCount || memcmp(srcBuffer, destBuffer, srcReadedBytesCount) != 0) {
-			lseek(destFile, -destReadedBytesCount, SEEK_CUR);
 			if(!isDryRun && write(destFile, srcBuffer, srcReadedBytesCount) != srcReadedBytesCount) { ret = Error_diskFull; goto noStorageSpace; }
 			modifiedBlocksCount += 1;
 			if(isShowModofiedBlocks) {
@@ -338,6 +337,7 @@ int main(int argc, char *argv[]) {
 			};
 		}
 		else {
+			lseek(destFile, destReadedBytesCount, SEEK_CUR);
 		}
 		blocksCount += 1; 
 		offset += srcReadedBytesCount;

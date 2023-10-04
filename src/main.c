@@ -112,6 +112,14 @@ int File_truncate(int fd) {
 	#define O_NOATIME 0
 #endif
 
+int File_open(char const* path, int flags, mode_t mode) {
+	int f = open(path, flags, mode);
+	#if O_NOATIME != 0
+		if(f < 0) f = open(path, flags & ~O_NOATIME, mode);
+	#endif
+	return f;
+}
+
 ssize_t File_read(int file, uint8_t* buffer, size_t bufferSize) {
 	size_t bufferOffset = 0;
 	
@@ -290,7 +298,7 @@ int main(int argc, char *argv[]) {
 	srcBuffer = malloc(bufferSize + bufferSize); if(srcBuffer == NULL) { ret = Error_noMemory; goto noMemory; }
 	destBuffer = &srcBuffer[bufferSize];
 	
-	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : open(srcFilePath, O_RDONLY | O_LARGEFILE | O_NOATIME)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
+	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : File_open(srcFilePath, O_RDONLY | O_LARGEFILE | O_NOATIME, 0)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
 	int destFile = -1; 
 
 	void openDestFile(int split_index) {
@@ -301,7 +309,7 @@ int main(int argc, char *argv[]) {
 			strcpy(destFilePath, destFilePathTml);
 		}
 		
-		destFile = open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE | O_NOATIME, 0666);
+		destFile = File_open(destFilePath, O_RDWR | O_CREAT | O_DSYNC | O_LARGEFILE | O_NOATIME, 0666);
 	};
 	void closeDestFile() {
 		if(destFile < 0) return;

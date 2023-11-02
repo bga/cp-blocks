@@ -23,6 +23,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <getopt.h>
 
@@ -44,8 +46,9 @@
 #define OPTION_SHOW_MODIFIED_BLOCKS "show-modified-blocks"
 #define OPTION_SHOW_MODIFIED_BLOCKS_SHORT "m"
 
-const char help[] = ("%s [options] (srcFile | -) destFile"
+const char help[] = ("%s [options] (srcFile | -) (destFile | destDir/)"
 	"\ncopy srcFile to destFile but do not overwrite same blocks"
+	"\nif destDir passed then destFile = destDir + basename(srcFile)"
 	"\nversion " VERSION
 	"\n"
 	"\nOptions:"
@@ -72,6 +75,21 @@ enum {
 	
 	Error_notModified = 1,
 };
+
+bool Path_isDir(char const* path) {
+	if(path == NULL || *path == 0) return false;
+	return path[strlen(path) - 1] == '/';
+}
+char const* Path_basename(char const* path) {
+	char const* slashPtr = strrchr(path, '/');
+	if(slashPtr == NULL) slashPtr = path;
+	return slashPtr;
+}
+bool File_isDir(char const* path) {
+	struct stat statbuf;
+	if(stat(path, &statbuf) != 0) return 0;
+	return S_ISDIR(statbuf.st_mode);
+}
 
 int File_eof(int fd) {
 	uint8_t buffer[1];
@@ -289,7 +307,7 @@ int main(int argc, char *argv[]) {
 	};
 	
 	const char* const srcFilePath = argv[argvFileIndex];
-	const char* const destFilePathTml = argv[argvFileIndex + 1];
+	const char* destFilePathTml = argv[argvFileIndex + 1];
 	char destFilePath[PATH_MAX];
 	
 	uint8_t* srcBuffer;
@@ -299,6 +317,13 @@ int main(int argc, char *argv[]) {
 	destBuffer = &srcBuffer[bufferSize];
 	
 	int srcFile = ((strcmp(srcFilePath , "-") == 0) ? STDIN_FILENO : File_open(srcFilePath, O_RDONLY | O_LARGEFILE | O_NOATIME, 0)); if(srcFile < 0) { ret = Error_srcOpenFailded; goto openSrcFailed; }
+
+	//# if { destFilePath } is dir - make { destFilePath += basename(srcFilePath)
+	if(Path_isDir(destFilePathTml)) {
+		if(!File_isDir(destFilePathTml)) { ret = Error_destOpenFailded; goto openDestFailed; }
+		//# ok unreleased ptr...
+		destFilePathTml = strcat(strdup(destFilePathTml), Path_basename(srcFilePath));
+	};
 	int destFile = -1; 
 
 	void openDestFile(int split_index) {

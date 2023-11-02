@@ -45,7 +45,7 @@ CPPFLAGS += -fPIC
 CPPFLAGS += -fdollars-in-identifiers
 CPPFLAGS += -pthread 
 CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE 
-CPPFLAGS += "-DVERSION=\"1.1.4\"" 
+CPPFLAGS += "-DVERSION=\"1.1.5\"" 
 
 ifdef DEBUG
 	CPPFLAGS += -ggdb -DDEBUG -Og

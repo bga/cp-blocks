@@ -192,6 +192,16 @@ File_AsyncRequest File_readAnync(int file, uint8_t* buffer, size_t bufferSize) {
 	return asyncRequest;
 }
 
+char* rstrcat(char* dest, char const* src) {
+	size_t destLen = strlen(dest);
+	size_t srcLen = strlen(src);
+	dest = realloc(dest, destLen + srcLen + 1);
+	if(dest == NULL) return dest;
+	strcat(dest + destLen, src);
+
+	return dest;
+}
+
 int main(int argc, char *argv[]) {
 	const char* const selfName = argv[0];
 	
@@ -322,7 +332,7 @@ int main(int argc, char *argv[]) {
 	if(Path_isDir(destFilePathTml)) {
 		if(!File_isDir(destFilePathTml)) { ret = Error_destOpenFailded; goto openDestFailed; }
 		//# ok unreleased ptr...
-		destFilePathTml = strcat(strdup(destFilePathTml), Path_basename(srcFilePath));
+		destFilePathTml = rstrcat(strdup(destFilePathTml), Path_basename(srcFilePath));
 	};
 	int destFile = -1; 
 

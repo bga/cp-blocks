@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+TEMP ?= /tmp
+
 
 space :=
 space +=
@@ -19,7 +21,7 @@ nospaces = $(subst $(space),-,$1)
 
 PROJECT = $(call nospaces,$(shell basename "`pwd`"))
 
-TARGET_EXEC ?= $(PROJECT).exe
+TARGET_EXEC ?= $(PROJECT)
 
 ARCH ?= i386
 PLATFORM ?= windows
@@ -46,6 +48,13 @@ CPPFLAGS += -fdollars-in-identifiers
 CPPFLAGS += -pthread 
 CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE 
 CPPFLAGS += "-DVERSION=\"1.1.6\"" 
+
+ifeq "$(PLATFORM)" 'windows'
+  TARGET_EXEC := $(TARGET_EXEC).exe
+  CPPFLAGS += -D_WIN32
+  LDFLAGS += -mwindows
+endif
+
 
 ifdef DEBUG
 	CPPFLAGS += -ggdb -DDEBUG -Og
@@ -100,7 +109,7 @@ test-split: test-data.bin
 	sha1sum test-data.bin 
 	cat test-data.bin.copy.* | sha1sum 
 
-.PHONY: clean list test
+.PHONY: clean list test all
 
 clean:
 	$(RM) -r $(BUILD_DIR)
@@ -110,7 +119,7 @@ MKDIR_P ?= mkdir -p
 
 # [https://stackoverflow.com/a/26339924]
 list:
-	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+	@LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 # debugging make
 print-%:
